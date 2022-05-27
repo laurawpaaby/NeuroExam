@@ -1,0 +1,121 @@
+---
+title: "NEURO_EXAM"
+author: "LAURA PAAABY"
+date: "5/5/2022"
+output: html_document
+---
+
+## Behavioural Analysis of The Optimus Prime Experiment 
+this is made to see whether the prime had any effect in the reaction time
+
+```{r}
+pacman::p_load(tidyverse, lme4, lmerTest, tidytext, car, devtools, maps, xtable, shiny, caret, dplyr, tidyr, stringr, kableExtra, formattable,qwraps2, sjPlot)
+```
+
+*LOADING DATA*
+```{r}
+data <- read_csv("behave_data_neuro.csv")
+head(data)
+```
+#### GETTING R TIME OUT AS A LIST 
+```{r}
+rt <- list(data$rt)
+write.csv(rt,"rt.csv",row.names = T)
+
+mean(data$rt)
+
+```
+
+
+
+### models 
+
+**MIXED EFFECT: RT ~ PRIME (1|TRIAL_NUMBER)**
+lets see how well the reaction time are predicted by the prime, with trial_number as the random effect.
+```{r}
+m_react <- lmer(rt ~ prime + (1|trial_number), data = data, 
+    control=lmerControl(check.nobs.vs.nlev = "ignore",
+     check.nobs.vs.rankZ = "ignore",
+     check.nobs.vs.nRE="ignore"))
+
+summary(m_react)
+```
+There are no significant difference in the reaction time whether you are primed spatially, with color or not at all. 
+
+**LINEAR MODEL: RT ~ PRIME**
+```{r}
+lin_rt <- lm(rt_fix ~ prime_new, data)
+summary(lin_rt)
+```
+
+# NOW TIME FOR THE REAL MODELS - GLMER
+this must be done since the reaction time is not normally distributed :p 
+```{r}
+hist(data$rt, breaks = 100)
+```
+i argue this looks very GAMMA like distributed, thus a glmer is used
+
+#### for all **five prime conditions**
+
+```{r}
+model_glm <- glmer(rt ~ prime + (1|trial_number), family = Gamma, data = data)
+summary(model_glm)
+```
+
+
+Okay here we can actually see some significant differences in the reaction time - however, here we distinquish between the red/blue prime and the left/right spatial prime, which i am not interested in. I thus combine these columns:
+
+
+### for **three priming conditions**
+```{r}
+data$prime_new <- ifelse(data$prime == 'red'|data$prime == 'blue', 'colour', ifelse(data$prime == 'left' | data$prime == 'right', 'spatial', 'Anoprime'))
+
+data$prime_num <- ifelse(data$prime == 'red'|data$prime == 'blue', '1', ifelse(data$prime == 'left' | data$prime == 'right', '2', '3'))
+
+#### just checking if it matches 
+try <- tibble(data$prime, data$prime_new)
+try
+
+m<-mean(data$rt)
+sd<-sd(data$rt)
+out.u<-m+2*sd
+
+data$rt_fix<-ifelse(data$rt>out.u,NA,data$rt)
+
+```
+
+## MODEL TIME:
+```{r}
+model_glm_p <- glmer(rt_fix ~ prime_new + (1|trial_number), family = Gamma, data = data)
+summary(model_glm_p)
+
+p <- sum((residuals(model_glm_p))^2)
+pre
+```
+
+
+### visualizing the difference in reaction time
+```{r}
+## fixed rt:
+m<-mean(data$rt)
+sd<-sd(data$rt)
+out.u<-m+2*sd
+
+data$rt_fix<-ifelse(data$rt>out.u,NA,data$rt)
+
+
+p<-ggplot(data, aes(x=prime_new, y=rt_fix, colour=prime_new)) +
+  stat_boxplot(geom = "errorbar", width = 0.2) +
+  geom_boxplot() + labs(title = "Reaction Time in the Different Prime Conditions ", 
+                        x = "Prime Type",
+                        y = "Reaction Time") +
+  scale_color_grey() + theme_classic() 
+
+p
+```
+
+
+
+
+
+

@@ -1,0 +1,247 @@
+---
+title: "EEG_MODELS"
+author: "LAURA PAAABY"
+date: "5/5/2022"
+output: html_document
+---
+## EEG Analysis of The Optimus Prime Experiment 
+
+This is made on the preprocessed data, where I have made the data set in choosing the time periods and channels of interest regarding each of the components  
+
+*libraries*
+```{r}
+pacman::p_load(tidyverse, lme4, lmerTest, tidytext, car, devtools, maps, xtable, shiny, caret, dplyr, tidyr, stringr, kableExtra, formattable,qwraps2, MuMIn)
+```
+
+
+# **P100**
+*read data*
+```{r, message=FALSE}
+no_prime100 <- read_csv("P100_DATA/No100Prime.csv")
+prime100 <- read_csv("P100_DATA/General100Prime.csv")
+col_prime100 <- read_csv("P100_DATA/Col100Prime.csv")
+spa_prime100 <- read_csv("P100_DATA/Spa100Prime.csv")
+
+#Now we add a column in each of them called *prime type*
+
+no_prime100$prime_type <- "ANoPrime"
+prime100$prime_type <- "GeneralPrime"
+col_prime100$prime_type <- "ColPrime"
+spa_prime100$prime_type <- "SpaPrime"
+
+###then we have to call the name of the 
+###lets now make it all one big data set:
+
+data_100 <- Reduce(function(...) merge(..., all=TRUE), list(col_prime100, spa_prime100, no_prime100))
+
+### changing the names, so it isn't called levels:
+data_100 <- data_100 %>% 
+  rename(Trials = level_0) %>% 
+  rename(Channels = level_1) %>% 
+  rename(SignalInTimeWindow = level_2)
+
+#hist(data_100$signal, breaks = 100)
+
+```
+the signals looks normally distributed, thus we continue with a 
+
+### MODEL TIME 
+First ill make a 
+```{r}
+model100 <- lmer(signal ~ prime_type + (1|Trials), data = data_100, 
+    control=lmerControl(check.nobs.vs.nlev = "ignore",
+     check.nobs.vs.rankZ = "ignore",
+     check.nobs.vs.nRE="ignore"))
+
+summary(model100)
+r.squaredGLMM(model100)
+#qqnorm(resid(model100))
+```
+okay somehow we manage to get significant results here .... 
+```{r}
+model100 <- lm(signal ~ prime_type, data = data_100)
+summary(model100)
+```
+
+
+
+
+# **P200**
+*read data*
+```{r, message=FALSE}
+no_prime200 <- read_csv("P200_DATA/No200Prime.csv")
+prime200 <- read_csv("P200_DATA/General200Prime.csv")
+col_prime200 <- read_csv("P200_DATA/Col200Prime.csv")
+spa_prime200 <- read_csv("P200_DATA/Spa200Prime.csv")
+
+
+#Now we add a column in each of them called *prime type*
+no_prime200$prime_type <- "ANoPrime"
+prime200$prime_type <- "GeneralPrime"
+col_prime200$prime_type <- "ColPrime"
+spa_prime200$prime_type <- "SpaPrime"
+
+#then we have to call the name of the 
+#lets now make it all one big data set:
+
+data_200 <- Reduce(function(...) merge(..., all=TRUE), list(col_prime200, spa_prime200, no_prime200))
+
+### changing the names, so it isn't called levels:
+data_200 <- data_200 %>% 
+  rename(Trials = level_0) %>% 
+  rename(Channels = level_1) %>% 
+  rename(SignalInTimeWindow = level_2)
+
+#hist(data_200$signal, breaks = 100)
+
+```
+the signals looks normally distributed, thus we continue with a 
+
+### MODEL TIME 
+First ill make a 
+```{r}
+model200 <- lmer(signal ~ prime_type + (1|Trials), data = data_200, 
+    control=lmerControl(check.nobs.vs.nlev = "ignore",
+     check.nobs.vs.rankZ = "ignore",
+     check.nobs.vs.nRE="ignore"))
+
+summary(model200)
+r.squaredGLMM(model200)
+#qqnorm(resid(model200))
+```
+
+
+
+# **N170**
+*read data*
+```{r, message=FALSE}
+no_prime170 <- read_csv("N170_DATA/No170Prime.csv")
+prime170 <- read_csv("N170_DATA/General170Prime.csv")
+col_prime170 <- read_csv("N170_DATA/Col170Prime.csv")
+spa_prime170 <- read_csv("N170_DATA/Spa170Prime.csv")
+
+
+#Now we add a column in each of them called *prime type*
+no_prime170$prime_type <- "ANoPrime"
+prime170$prime_type <- "GeneralPrime"
+col_prime170$prime_type <- "ColPrime"
+spa_prime170$prime_type <- "SpaPrime"
+
+#then we have to call the name of the 
+#lets now make it all one big data set:
+
+data_170 <- Reduce(function(...) merge(..., all=TRUE), list(col_prime170, spa_prime170, no_prime170))
+
+### changing the names, so it isn't called levels:
+data_170 <- data_170 %>% 
+  rename(Trials = level_0) %>% 
+  rename(Channels = level_1) %>% 
+  rename(SignalInTimeWindow = level_2)
+
+#hist(data_170$signal, breaks = 100)
+```
+
+### MODEL TIME - N170
+```{r}
+model170 <- lmer(signal ~ prime_type + (1|Trials), data = data_170, 
+    control=lmerControl(check.nobs.vs.nlev = "ignore",
+     check.nobs.vs.rankZ = "ignore",
+     check.nobs.vs.nRE="ignore"))
+
+summary(model170)
+r.squaredGLMM(model170)
+#qqnorm(resid(model170))
+```
+
+
+
+# **N400**
+*read data*
+```{r, message=FALSE}
+no_prime400 <- read_csv("N400_DATA/No400Prime.csv")
+prime400 <- read_csv("N400_DATA/General400Prime.csv")
+col_prime400 <- read_csv("N400_DATA/Col400Prime.csv")
+spa_prime400 <- read_csv("N400_DATA/Spa400Prime.csv")
+
+
+#Now we add a column in each of them called *prime type*
+no_prime400$prime_type <- "ANoPrime"
+prime400$prime_type <- "GeneralPrime"
+col_prime400$prime_type <- "ColPrime"
+spa_prime400$prime_type <- "SpaPrime"
+
+#then we have to call the name of the 
+#lets now make it all one big data set:
+
+data_400 <- Reduce(function(...) merge(..., all=TRUE), list(col_prime400, spa_prime400, no_prime400))
+
+### changing the names, so it isn't called levels:
+data_400 <- data_400 %>% 
+  rename(Trials = level_0) %>% 
+  rename(Channels = level_1) %>% 
+  rename(SignalInTimeWindow = level_2)
+
+#hist(data_400$signal, breaks = 100)
+var(data_400$signal)
+```
+
+
+### MODEL TIME - N400
+```{r}
+model400 <- lmer(signal ~ prime_type + (1|Trials), data = data_400, 
+    control=lmerControl(check.nobs.vs.nlev = "ignore",
+     check.nobs.vs.rankZ = "ignore",
+     check.nobs.vs.nRE="ignore"))
+
+summary(model400)
+r.squaredGLMM(model400)
+#qqnorm(resid(model400))
+
+```
+
+### consider looking at the lads 
+
+
+#### LOOKING AT CHANNELS ...
+```{r}
+model_channels <- lmer(signal ~ prime_type + (1|Channels), data = data_400, 
+    control=lmerControl(check.nobs.vs.nlev = "ignore",
+     check.nobs.vs.rankZ = "ignore",
+     check.nobs.vs.nRE="ignore"))
+
+summary(model_channels)
+```
+
+
+
+
+
+```{r}
+library(sjPlot)
+library(sjmisc)
+
+sjp.lmer(model_channels, vars = "signal", type = "ri.slope")
+
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+### LEVENES TEST 
+```{r}
+y <- c(data_100$signal, data_200$signal, data_170$signal, data_400$signal)
+group <- as.factor(c(rep(1, length(data_100$signal)), rep(2, length(data_170$signal)), rep(3, length(data_200$signal)), rep(4, length(data_400$signal))))
+
+leveneTest(y, group)
+```
+
